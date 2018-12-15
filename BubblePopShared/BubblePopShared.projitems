@@ -16,5 +16,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Code\BubbleGrid.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Code\Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Code\Game1.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Code\Score.cs" />
   </ItemGroup>
 </Project>

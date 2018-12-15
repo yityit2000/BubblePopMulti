@@ -14,6 +14,9 @@ namespace BubblePop
         Camera2D camera;
         ViewportAdapter viewportAdapter;
         SpriteBatch spriteBatch;
+        SpriteFont font;
+
+        Score score;
 
         MouseState oldState;
 
@@ -21,6 +24,7 @@ namespace BubblePop
         BubbleGrid bubbleGrid;
 
         int difficulty = Constants.STARTING_DIFFICULTY;
+        int level;
 
         bool readyToRemoveActivatedBubbles = false;
 
@@ -43,6 +47,10 @@ namespace BubblePop
             // Viewport Adapter and Camera2d makes sure we always output to given virtual dimensions, even through resizing.
             viewportAdapter = new BoxingViewportAdapter(Window, GraphicsDevice, (int)Constants.SCREEN_WIDTH, (int)Constants.SCREEN_HEIGHT);
             camera = new Camera2D(viewportAdapter);
+            score = new Score();
+            level = 1;
+
+            font = Content.Load<SpriteFont>("Score");
 
             bubbleGrid = new BubbleGrid(this.Content);
             bubbleGrid.Initialize(difficulty);
@@ -122,14 +130,18 @@ namespace BubblePop
 
                 if (readyToRemoveActivatedBubbles)
                 {
+                    score.Add(bubbleGrid.NumberOfActivatedBubbles(), level);
                     bubbleGrid.RemoveActivatedBubbles();
-                    //score.Add(bubbleGrid.numberOfActivatedBubblesCleared); or something
                     bubbleGrid.DropFloatingBubbles();
                     bubbleGrid.CollapseBubbleColumns();
                     readyToRemoveActivatedBubbles = false;
                     oldState = newState;
                     if (LevelIsCleared()) //May eventually pass in score.Value
                     {
+                        if (difficulty < 7)
+                        {
+                            level++;
+                        }
                         StartNextLevel();
                     }
                     return;
@@ -170,6 +182,8 @@ namespace BubblePop
 
             spriteBatch.Begin(samplerState: SamplerState.LinearWrap, blendState: BlendState.AlphaBlend, transformMatrix: viewportAdapter.GetScaleMatrix());
             bubbleGrid.Draw(spriteBatch);
+            spriteBatch.DrawString(font, "Score: " + score.GameScore, new Vector2(50, 50), Color.White);
+            spriteBatch.DrawString(font, "Current Batch: " + score.ScoreOfCurrentBatch(bubbleGrid.NumberOfActivatedBubbles(), level), new Vector2(50, 100), Color.White);
             spriteBatch.End();
 
             spriteBatch.Begin(transformMatrix: camera.GetViewMatrix());

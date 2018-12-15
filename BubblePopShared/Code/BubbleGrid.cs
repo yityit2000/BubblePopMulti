@@ -173,6 +173,20 @@ namespace BubblePop
             return false;
         }
 
+        public int NumberOfActivatedBubbles()
+        {
+            int numberOfActivatedBubbles = 0;
+            foreach (Bubble bubble in bubbles)
+            {
+                if (bubble.Activated)
+                {
+                    numberOfActivatedBubbles++;
+                }
+            }
+
+            return numberOfActivatedBubbles;
+        }
+
         public void RemoveActivatedBubbles()
         {
             foreach (Bubble bubble in bubbles)

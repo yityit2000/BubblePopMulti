@@ -33,5 +33,8 @@ namespace BubblePop
 
         // A constant integer representing a number that will never be an index of a List<Bubble>, easier to read when used
         public static int NO_BUBBLE = -5;
+
+        // This will set an amount for the main scoring unit of the game, per bubble.
+        public static int SCORING_UNIT = 1;
     }
 }

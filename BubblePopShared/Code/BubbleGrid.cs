@@ -16,12 +16,10 @@ namespace BubblePop
         MouseState oldState = Mouse.GetState();
 
         List<Bubble> bubbles;
-
-        bool readyToRemoveActivatedBubbles = false;
-        bool bubbleHasAtLeastOneSameColorNeighbor = false;
-
-        // Represents the amount of colors in the grid.
-        int difficulty;
+        public List<Bubble> Bubbles
+        {
+            get { return bubbles; }
+        }
 
         readonly Texture2D bubbleSprite;
         readonly Texture2D activateBubbleOverlaySprite;
@@ -31,109 +29,28 @@ namespace BubblePop
             bubbles = new List<Bubble>();
             random = new Random();
             bubbleSprite = Content.Load<Texture2D>("bubble");
-            difficulty = Constants.STARTING_DIFFICULTY;
             activateBubbleOverlaySprite = Content.Load<Texture2D>("bubble_outline");
         }
 
-        public void Initialize()
+        public void Initialize(int difficulty)
         {
             bubbles.Clear();
-            int bubbleCounter = 0;
             // Set up initial grid of bubbles.
             for (int i = 0; i < Constants.GRID_HEIGHT_IN_UNITS; i++)
             {
                 for (int j = 0; j < Constants.GRID_WIDTH_IN_UNITS; j++)
                 {
                     Vector2 thisBubblesPosition = Vector2.Add(Constants.BUBBLE_GRID_ORIGIN, new Vector2(j * Constants.WORLD_UNIT, i * Constants.WORLD_UNIT));
-                    Bubble bubble = new Bubble(thisBubblesPosition, GenerateRandomColor(), bubbleSprite);
-                    Console.WriteLine("Bubble " + bubbleCounter + ": (" + thisBubblesPosition.X + ", " + thisBubblesPosition.Y + ")");
+                    Bubble bubble = new Bubble(thisBubblesPosition, GenerateRandomColor(difficulty), bubbleSprite);
                     bubbles.Add(bubble);
 
                 }
             }
-
-
         }
 
         public void Update(GameTime gameTime, Camera2D camera)
         {
-            MouseState newState = Mouse.GetState();
-            TouchCollection touchCollection = TouchPanel.GetState();
-
-            if (newState.LeftButton == ButtonState.Pressed && oldState.LeftButton == ButtonState.Released || touchCollection.Count > 0)
-            {
-                Vector2 clickLocation = camera.ScreenToWorld(new Vector2(newState.X, newState.Y));
-                Vector2 touchLocation = Vector2.Zero;
-
-                //Only Fire Select Once it's been released
-                if (touchCollection.Count > 0)
-                {
-                    if (touchCollection[0].State == TouchLocationState.Pressed)
-                    {
-                        touchLocation = camera.ScreenToWorld(touchCollection[0].Position);
-                    }
-                }
-
-                foreach (Bubble bubble in bubbles)
-                {
-                    // If we click on a deactivated bubble, we want to deactivate whatever has been activated first
-                    if (bubble.Intersects(clickLocation) || bubble.Intersects(touchLocation))
-                    {
-                        if (!bubble.Activated)
-                        {
-                            DeactivateAllBubbles();
-                        }
-                        else if (bubble.Activated && bubbleHasAtLeastOneSameColorNeighbor)
-                        {
-                            readyToRemoveActivatedBubbles = true;
-                            break;
-                        }
-                    }
-                }
-
-                // We need to do this outside of the above loop because it's still looping through all the bubbles on the list. We can't
-                // delete bubbles that it's going to try to loop through later, so we instead tell the program "Hey, by the way, when you're
-                // done with that loop, go ahead and remove all those activated bubbles, yeah?" And the program is like "Yeah, man, got it."
-                if (readyToRemoveActivatedBubbles)
-                {
-                    RemoveActivatedBubbles();
-                    DropFloatingBubbles();
-                    CollapseBubbleColumns();
-
-                    // We reset these booleans in preparation for the next set of bubbles to be activated and eventually removed.
-                    readyToRemoveActivatedBubbles = false;
-                    bubbleHasAtLeastOneSameColorNeighbor = false;
-                    oldState = newState;
-                    if (LevelIsCleared())
-                    {
-                        StartNextLevel();
-                    }
-                    return;
-                }
-
-                foreach (Bubble bubble in bubbles)
-                {
-                    if (bubble.Intersects(clickLocation) || bubble.Intersects(touchLocation))
-                    {
-                        bubble.Activate();
-                    }
-                }
-                // This loop is to activate all the connected bubbles to the one clicked. We loop it the number of times there are
-                // rows in the grid to make sure we cover all possible connected bubbles. Ideally we would do a recursive method call
-                // on ActivateConnectedBubbles, but c# isn't optimized for such an operation.
-                for (int i = 0; i < Constants.GRID_HEIGHT_IN_UNITS; i++)
-                {
-                    foreach (Bubble bubble in bubbles)
-                    {
-                        if (bubble.Activated)
-                        {
-                            ActivateConnectedBubbles(bubbles.IndexOf(bubble));
-                        }
-                    }
-                }
-            }
-
-            oldState = newState;
+            //A remnant from when we had the update code in this class. We moved this to the main game class. This can be removed eventually.
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -148,27 +65,39 @@ namespace BubblePop
             }
         }
 
-        // This method activates all the bubbles connected to the bubble at the index given, provided that those bubbles are of the same color. This
-        // method ALSO checks whether there are any neighbors to the bubble at the index given that are of the same color, kept track of in the boolean
-        // "bubbleHasAtLeastOneSameColorNeighbor".
+        public void ActivateAllConnectedBubbles()
+        {
+            // This loop is to activate all the connected bubbles to the one clicked. We loop it the number of times there are
+            // rows in the grid to make sure we cover all possible connected bubbles. Ideally we would do a recursive method call
+            // on ActivateConnectedBubbles, but c# isn't optimized for such an operation.
+            for (int i = 0; i < Constants.GRID_HEIGHT_IN_UNITS; i++)
+            {
+                foreach (Bubble bubble in bubbles)
+                {
+                    if (bubble.Activated)
+                    {
+                        ActivateConnectedBubbles(bubbles.IndexOf(bubble));
+                    }
+                }
+            }
+        }
+
+        // This method activates all the bubbles connected to the bubble at the index given, provided that those bubbles are of the same color.
         public void ActivateConnectedBubbles(int index)
         {
-            bubbleHasAtLeastOneSameColorNeighbor = false;
-
             int leftBubbleIndex = GetBubbleIndexFromPosition(bubbles[index].Position.X - Constants.WORLD_UNIT, bubbles[index].Position.Y);
             int rightBubbleIndex = GetBubbleIndexFromPosition(bubbles[index].Position.X + Constants.WORLD_UNIT, bubbles[index].Position.Y);
             int upBubbleIndex = GetBubbleIndexFromPosition(bubbles[index].Position.X, bubbles[index].Position.Y - Constants.WORLD_UNIT);
             int downBubbleIndex = GetBubbleIndexFromPosition(bubbles[index].Position.X, bubbles[index].Position.Y + Constants.WORLD_UNIT);
 
-            // For all of these, we make sure that the index is greater than -1, because when we get the bubble index from the position using
-            // the corresponding method, we designed it so that it returned -1 if that bubble didn't exist.
+            // For all of these, we make sure that the index corresponds to a bubble that exists, because when we get the bubble index from
+            //the position using the corresponding method, we designed it so that it returned Constants.NO_BUBBLE if that bubble didn't exist.
 
             if (leftBubbleIndex != Constants.NO_BUBBLE && OnSameRow(index, leftBubbleIndex)) //AKA, if a bubble at this index exists
             {
                 if (bubbles[index].BubbleColor == bubbles[leftBubbleIndex].BubbleColor)
                 {
                     bubbles[leftBubbleIndex].Activate();
-                    bubbleHasAtLeastOneSameColorNeighbor = true;
                 }
             }
 
@@ -177,7 +106,6 @@ namespace BubblePop
                 if (bubbles[index].BubbleColor == bubbles[rightBubbleIndex].BubbleColor)
                 {
                     bubbles[rightBubbleIndex].Activate();
-                    bubbleHasAtLeastOneSameColorNeighbor = true;
                 }
             }
 
@@ -186,7 +114,6 @@ namespace BubblePop
                 if (bubbles[index].BubbleColor == bubbles[upBubbleIndex].BubbleColor)
                 {
                     bubbles[upBubbleIndex].Activate();
-                    bubbleHasAtLeastOneSameColorNeighbor = true;
                 }
             }
 
@@ -195,43 +122,55 @@ namespace BubblePop
                 if (bubbles[index].BubbleColor == bubbles[downBubbleIndex].BubbleColor)
                 {
                     bubbles[downBubbleIndex].Activate();
-                    bubbleHasAtLeastOneSameColorNeighbor = true;
                 }
             }
         }
 
-        public bool LevelIsCleared()
+        public bool BubbleHasSameColorNeighbor(Bubble bubble)
         {
-            // If we are out of bubbles, then we're obviously done with the level. We don't have to do the rest of this method.
-            if (bubbles.Count == 0)
-            {
-                return true;
-            }
+            int index = bubbles.IndexOf(bubble);
 
-            // Here we loop through each bubble and see if any of them trip the boolean "bubbleHasAtLeastOneSameColorNeighbor" and make it true. If any of the bubbles
-            // remaining do indeed have one connected same-color partner, the level isn't over yet, so we return false. If none of them have at least one same color
-            // partner, then we return true and the level is cleared.
-            foreach (Bubble bubble in bubbles)
+            int leftBubbleIndex = GetBubbleIndexFromPosition(bubbles[index].Position.X - Constants.WORLD_UNIT, bubbles[index].Position.Y);
+            int rightBubbleIndex = GetBubbleIndexFromPosition(bubbles[index].Position.X + Constants.WORLD_UNIT, bubbles[index].Position.Y);
+            int upBubbleIndex = GetBubbleIndexFromPosition(bubbles[index].Position.X, bubbles[index].Position.Y - Constants.WORLD_UNIT);
+            int downBubbleIndex = GetBubbleIndexFromPosition(bubbles[index].Position.X, bubbles[index].Position.Y + Constants.WORLD_UNIT);
+
+            // For all of these, we make sure that the index corresponds to a bubble that exists, because when we get the bubble index from
+            //the position using the corresponding method, we designed it so that it returned Constants.NO_BUBBLE if that bubble didn't exist.
+
+            if (leftBubbleIndex != Constants.NO_BUBBLE && OnSameRow(index, leftBubbleIndex)) //AKA, if a bubble at this index exists
             {
-                // Remember, this method also acts as a check to see if there are any connected bubbles of the same color. Since that's the reason we're using it, we
-                // deactivate all the bubbles immediately after calling it.
-                ActivateConnectedBubbles(bubbles.IndexOf(bubble));
-                DeactivateAllBubbles();
-                if (bubbleHasAtLeastOneSameColorNeighbor)
+                if (bubbles[index].BubbleColor == bubbles[leftBubbleIndex].BubbleColor)
                 {
-                    return false;
+                    return true;
                 }
             }
-            return true;
-        }
 
-        public void StartNextLevel()
-        {
-            if (difficulty < 7)
+            if (rightBubbleIndex != Constants.NO_BUBBLE && rightBubbleIndex < bubbles.Count && OnSameRow(index, rightBubbleIndex))
             {
-                difficulty++;
+                if (bubbles[index].BubbleColor == bubbles[rightBubbleIndex].BubbleColor)
+                {
+                    return true;
+                }
             }
-            Initialize();
+
+            if (upBubbleIndex != Constants.NO_BUBBLE)
+            {
+                if (bubbles[index].BubbleColor == bubbles[upBubbleIndex].BubbleColor)
+                {
+                    return true;
+                }
+            }
+
+            if (downBubbleIndex != Constants.NO_BUBBLE && downBubbleIndex < bubbles.Count)
+            {
+                if (bubbles[index].BubbleColor == bubbles[downBubbleIndex].BubbleColor)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public void RemoveActivatedBubbles()
@@ -248,7 +187,7 @@ namespace BubblePop
                 }
             }
         }
-        
+
         public void DropFloatingBubbles()
         {
             for (int i = bubbles.Count-1; i >= 0; i--)
@@ -289,7 +228,7 @@ namespace BubblePop
             {
                 int currentIndex = GetBubbleIndexFromPosition(Constants.BUBBLE_GRID_ORIGIN.X + i * Constants.WORLD_UNIT, Constants.BOTTOM_OF_GRID);
 
-                if (currentIndex == Constants.NO_BUBBLE) { continue;  }
+                if (currentIndex == Constants.NO_BUBBLE) { continue; }
 
                 // If there's no bubble to the left of the current bubble on the bottom row, then...
                 if (GetBubbleIndexFromPosition(bubbles[currentIndex].Position.X - Constants.WORLD_UNIT, Constants.BOTTOM_OF_GRID) == Constants.NO_BUBBLE)
@@ -371,11 +310,11 @@ namespace BubblePop
 
         }
         // Generates a random color for the purpose of initializing the game.
-        private Color GenerateRandomColor()
+        private Color GenerateRandomColor(int numberOfColors)
         {
             Color randomColor = Color.White;
 
-            switch (random.Next(difficulty))
+            switch (random.Next(numberOfColors))
             {
                 case 0:
                     randomColor = Color.Blue;

@@ -5,16 +5,40 @@ VisualStudioVersion = 15.0.27428.2015
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BubblePop", "BubblePop\BubblePop.csproj", "{541F3282-0B02-4A71-A5EE-D237F85618D8}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "_BubblePopShared", "BubblePopShared\_BubblePopShared.shproj", "{A8CB2F67-C058-4369-8F28-31AA1C1668A2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BubblePopAndroid", "BubblePopAndroid\BubblePopAndroid.csproj", "{EC258A9F-89B5-4735-8CFA-F3EA8A8684B0}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		BubblePopShared\BubblePopShared.projitems*{a8cb2f67-c058-4369-8f28-31aa1c1668a2}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
 		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{541F3282-0B02-4A71-A5EE-D237F85618D8}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{541F3282-0B02-4A71-A5EE-D237F85618D8}.Debug|Any CPU.Build.0 = Debug|x86
 		{541F3282-0B02-4A71-A5EE-D237F85618D8}.Debug|x86.ActiveCfg = Debug|x86
 		{541F3282-0B02-4A71-A5EE-D237F85618D8}.Debug|x86.Build.0 = Debug|x86
+		{541F3282-0B02-4A71-A5EE-D237F85618D8}.Release|Any CPU.ActiveCfg = Release|x86
 		{541F3282-0B02-4A71-A5EE-D237F85618D8}.Release|x86.ActiveCfg = Release|x86
 		{541F3282-0B02-4A71-A5EE-D237F85618D8}.Release|x86.Build.0 = Release|x86
+		{EC258A9F-89B5-4735-8CFA-F3EA8A8684B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC258A9F-89B5-4735-8CFA-F3EA8A8684B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC258A9F-89B5-4735-8CFA-F3EA8A8684B0}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{EC258A9F-89B5-4735-8CFA-F3EA8A8684B0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EC258A9F-89B5-4735-8CFA-F3EA8A8684B0}.Debug|x86.Build.0 = Debug|Any CPU
+		{EC258A9F-89B5-4735-8CFA-F3EA8A8684B0}.Debug|x86.Deploy.0 = Debug|Any CPU
+		{EC258A9F-89B5-4735-8CFA-F3EA8A8684B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC258A9F-89B5-4735-8CFA-F3EA8A8684B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC258A9F-89B5-4735-8CFA-F3EA8A8684B0}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{EC258A9F-89B5-4735-8CFA-F3EA8A8684B0}.Release|x86.ActiveCfg = Release|Any CPU
+		{EC258A9F-89B5-4735-8CFA-F3EA8A8684B0}.Release|x86.Build.0 = Release|Any CPU
+		{EC258A9F-89B5-4735-8CFA-F3EA8A8684B0}.Release|x86.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

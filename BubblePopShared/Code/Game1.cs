@@ -25,7 +25,7 @@ namespace BubblePop
 
 
             Window.AllowUserResizing = true;
-            Window.Position = Point.Zero;
+            //Window.Position = Point.Zero;
 
             IsMouseVisible = true;
         }
@@ -44,8 +44,14 @@ namespace BubblePop
             bubbleGrid = new BubbleGrid(this.Content);
             bubbleGrid.Initialize();
 
+            // These lines are when we want to test larger grids. First switch the values of SCREEN_WIDTH and _HEIGHT in Constants.cs to those
+            // commented out.
             //graphics.PreferredBackBufferWidth = (int)(Constants.SCREEN_WIDTH / 1.4f);
             //graphics.PreferredBackBufferHeight = (int)(Constants.SCREEN_HEIGHT/ 1.4f);
+
+#if _ANDROID_
+            graphics.IsFullScreen = true;
+#endif
             graphics.PreferredBackBufferWidth = 480;
             graphics.PreferredBackBufferHeight = 800;
             graphics.ApplyChanges();

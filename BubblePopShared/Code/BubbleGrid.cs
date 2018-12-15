@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Input.Touch;
 using MonoGame.Extended;
 
 namespace BubblePop
@@ -20,6 +18,7 @@ namespace BubblePop
         List<Bubble> bubbles;
 
         bool readyToRemoveActivatedBubbles = false;
+        bool bubbleHasAtLeastOneSameColorNeighbor = false;
 
         // Represents the amount of colors in the grid.
         int difficulty;
@@ -35,12 +34,13 @@ namespace BubblePop
             difficulty = Constants.STARTING_DIFFICULTY;
             activateBubbleOverlaySprite = Content.Load<Texture2D>("bubble_outline");
         }
-        
+
         public void Initialize()
         {
+            bubbles.Clear();
             int bubbleCounter = 0;
             // Set up initial grid of bubbles.
-            for (int i = 0; i < Constants.GRID_HEIGHT_IN_UNITS ; i++)
+            for (int i = 0; i < Constants.GRID_HEIGHT_IN_UNITS; i++)
             {
                 for (int j = 0; j < Constants.GRID_WIDTH_IN_UNITS; j++)
                 {
@@ -51,29 +51,43 @@ namespace BubblePop
 
                 }
             }
-            
-            
+
+
         }
 
         public void Update(GameTime gameTime, Camera2D camera)
         {
             MouseState newState = Mouse.GetState();
+            TouchCollection touchCollection = TouchPanel.GetState();
 
-            if (newState.LeftButton == ButtonState.Pressed && oldState.LeftButton == ButtonState.Released)
+            if (newState.LeftButton == ButtonState.Pressed && oldState.LeftButton == ButtonState.Released || touchCollection.Count > 0)
             {
-                Console.WriteLine(newState.X + ", " + newState.Y);
                 Vector2 clickLocation = camera.ScreenToWorld(new Vector2(newState.X, newState.Y));
+                Vector2 touchLocation = Vector2.Zero;
+
+                //Only Fire Select Once it's been released
+                if (touchCollection.Count > 0)
+                {
+                    if (touchCollection[0].State == TouchLocationState.Pressed)
+                    {
+                        touchLocation = camera.ScreenToWorld(touchCollection[0].Position);
+                    }
+                }
+
                 foreach (Bubble bubble in bubbles)
                 {
                     // If we click on a deactivated bubble, we want to deactivate whatever has been activated first
-                    if (bubble.Intersects(clickLocation) && !bubble.Activated)
+                    if (bubble.Intersects(clickLocation) || bubble.Intersects(touchLocation))
                     {
-                        DeactivateAllBubbles();
-                    }
-                    else if(bubble.Intersects(clickLocation) && bubble.Activated)
-                    {
-                        readyToRemoveActivatedBubbles = true;
-                        break;
+                        if (!bubble.Activated)
+                        {
+                            DeactivateAllBubbles();
+                        }
+                        else if (bubble.Activated && bubbleHasAtLeastOneSameColorNeighbor)
+                        {
+                            readyToRemoveActivatedBubbles = true;
+                            break;
+                        }
                     }
                 }
 
@@ -85,15 +99,21 @@ namespace BubblePop
                     RemoveActivatedBubbles();
                     DropFloatingBubbles();
                     CollapseBubbleColumns();
+
+                    // We reset these booleans in preparation for the next set of bubbles to be activated and eventually removed.
                     readyToRemoveActivatedBubbles = false;
-                    // This is the last thing we need to do in this function after a click, so we leave before doing more loops.
+                    bubbleHasAtLeastOneSameColorNeighbor = false;
                     oldState = newState;
+                    if (LevelIsCleared())
+                    {
+                        StartNextLevel();
+                    }
                     return;
                 }
 
                 foreach (Bubble bubble in bubbles)
                 {
-                    if (bubble.Intersects(clickLocation))
+                    if (bubble.Intersects(clickLocation) || bubble.Intersects(touchLocation))
                     {
                         bubble.Activate();
                     }
@@ -114,16 +134,6 @@ namespace BubblePop
             }
 
             oldState = newState;
-
-            // Check to see if level has been cleared
-            if (bubbles.Count == 0)
-            {
-                if (difficulty < 7)
-                {
-                    difficulty++;
-                }
-                Initialize();
-            }
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -138,8 +148,12 @@ namespace BubblePop
             }
         }
 
+        // This method activates all the bubbles connected to the bubble at the index given, provided that those bubbles are of the same color. This
+        // method ALSO checks whether there are any neighbors to the bubble at the index given that are of the same color, kept track of in the boolean
+        // "bubbleHasAtLeastOneSameColorNeighbor".
         public void ActivateConnectedBubbles(int index)
         {
+            bubbleHasAtLeastOneSameColorNeighbor = false;
 
             int leftBubbleIndex = GetBubbleIndexFromPosition(bubbles[index].Position.X - Constants.WORLD_UNIT, bubbles[index].Position.Y);
             int rightBubbleIndex = GetBubbleIndexFromPosition(bubbles[index].Position.X + Constants.WORLD_UNIT, bubbles[index].Position.Y);
@@ -148,39 +162,76 @@ namespace BubblePop
 
             // For all of these, we make sure that the index is greater than -1, because when we get the bubble index from the position using
             // the corresponding method, we designed it so that it returned -1 if that bubble didn't exist.
-            
+
             if (leftBubbleIndex != Constants.NO_BUBBLE && OnSameRow(index, leftBubbleIndex)) //AKA, if a bubble at this index exists
             {
                 if (bubbles[index].BubbleColor == bubbles[leftBubbleIndex].BubbleColor)
                 {
                     bubbles[leftBubbleIndex].Activate();
+                    bubbleHasAtLeastOneSameColorNeighbor = true;
                 }
-
             }
-            
+
             if (rightBubbleIndex != Constants.NO_BUBBLE && rightBubbleIndex < bubbles.Count && OnSameRow(index, rightBubbleIndex))
             {
                 if (bubbles[index].BubbleColor == bubbles[rightBubbleIndex].BubbleColor)
                 {
                     bubbles[rightBubbleIndex].Activate();
+                    bubbleHasAtLeastOneSameColorNeighbor = true;
                 }
             }
-            
+
             if (upBubbleIndex != Constants.NO_BUBBLE)
             {
                 if (bubbles[index].BubbleColor == bubbles[upBubbleIndex].BubbleColor)
                 {
                     bubbles[upBubbleIndex].Activate();
+                    bubbleHasAtLeastOneSameColorNeighbor = true;
                 }
             }
-            
+
             if (downBubbleIndex != Constants.NO_BUBBLE && downBubbleIndex < bubbles.Count)
             {
                 if (bubbles[index].BubbleColor == bubbles[downBubbleIndex].BubbleColor)
                 {
                     bubbles[downBubbleIndex].Activate();
+                    bubbleHasAtLeastOneSameColorNeighbor = true;
                 }
             }
+        }
+
+        public bool LevelIsCleared()
+        {
+            // If we are out of bubbles, then we're obviously done with the level. We don't have to do the rest of this method.
+            if (bubbles.Count == 0)
+            {
+                return true;
+            }
+
+            // Here we loop through each bubble and see if any of them trip the boolean "bubbleHasAtLeastOneSameColorNeighbor" and make it true. If any of the bubbles
+            // remaining do indeed have one connected same-color partner, the level isn't over yet, so we return false. If none of them have at least one same color
+            // partner, then we return true and the level is cleared.
+            foreach (Bubble bubble in bubbles)
+            {
+                // Remember, this method also acts as a check to see if there are any connected bubbles of the same color. Since that's the reason we're using it, we
+                // deactivate all the bubbles immediately after calling it.
+                ActivateConnectedBubbles(bubbles.IndexOf(bubble));
+                DeactivateAllBubbles();
+                if (bubbleHasAtLeastOneSameColorNeighbor)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public void StartNextLevel()
+        {
+            if (difficulty < 7)
+            {
+                difficulty++;
+            }
+            Initialize();
         }
 
         public void RemoveActivatedBubbles()
@@ -212,7 +263,7 @@ namespace BubblePop
                 while(GetBubbleIndexFromPosition(bubbles[i].Position.X, bubbles[i].Position.Y + Constants.WORLD_UNIT) < 0)
                 {
                     counter++;
-                    if (counter > 8)
+                    if (counter > Constants.GRID_HEIGHT_IN_UNITS)
                     {
                         Console.WriteLine("Something went wrong, we're continuously dropping...");
                         return;

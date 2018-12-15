@@ -12,7 +12,7 @@ namespace BubblePop
     class Bubble
     {
         private Vector2 position;
-        Color bubbleColor;
+        private Color bubbleColor;
         private Vector2 center;
         
         // activated refers to when either a user clicks on a bubble or when it's next to one of the same color that's been activated
@@ -55,7 +55,7 @@ namespace BubblePop
         // between the two points is less than the radius. First we get the distance using Pythagorean Theorem. The radius
         // and the point make a right triangle if you trace the x and y paths and then connect the points. So using X^2 + Y^2 = D^2,
         // where "D" is the distance, we can see whether D is less than the radius. That being said, it's programatically cheaper
-        // to see if the square distance is less than the radius (D^2 < radius ^ 2). If it is, then the click is within the circle,
+        // to see if the square distance is less than the radius (D^2 < radius^2). If it is, then the click is within the circle,
         // and we have collision!
         public bool Intersects(Vector2 click)
         {

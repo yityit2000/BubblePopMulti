@@ -69,10 +69,18 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Bubble.cs" />
-    <Compile Include="BubbleGrid.cs" />
-    <Compile Include="Constants.cs" />
-    <Compile Include="Game1.cs" />
+    <Compile Include="..\BubblePopShared\Code\Bubble.cs">
+      <Link>Bubble.cs</Link>
+    </Compile>
+    <Compile Include="..\BubblePopShared\Code\BubbleGrid.cs">
+      <Link>BubbleGrid.cs</Link>
+    </Compile>
+    <Compile Include="..\BubblePopShared\Code\Constants.cs">
+      <Link>Constants.cs</Link>
+    </Compile>
+    <Compile Include="..\BubblePopShared\Code\Game1.cs">
+      <Link>Game1.cs</Link>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -93,11 +101,11 @@
     <Content Include="Icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <MonoGameContentReference Include="Content\Content.mgcb" />
+    <MonoGameContentReference Include="..\BubblePopShared\Content\Content.mgcb">
+      <Link>Content\Content.mgcb</Link>
+    </MonoGameContentReference>
     <None Include="app.manifest" />
     <None Include="BubblePop_TemporaryKey.pfx" />
-    <None Include="Content\bubble.xnb" />
-    <None Include="Content\bubble_outline.xnb" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -107,6 +115,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Content.Builder.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

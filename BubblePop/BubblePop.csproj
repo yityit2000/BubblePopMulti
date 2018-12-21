@@ -81,6 +81,9 @@
     <Compile Include="..\BubblePopShared\Code\Game1.cs">
       <Link>Game1.cs</Link>
     </Compile>
+    <Compile Include="..\BubblePopShared\Code\Powerup.cs">
+      <Link>Powerup.cs</Link>
+    </Compile>
     <Compile Include="..\BubblePopShared\Code\Score.cs">
       <Link>Score.cs</Link>
     </Compile>

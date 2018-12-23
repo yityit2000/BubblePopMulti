@@ -36,5 +36,8 @@ namespace BubblePop
 
         // This will set an amount for the main scoring unit of the game, per bubble.
         public static int SCORING_UNIT = 1;
+
+        // This defines all the types of powerups in this game.
+        public static string[] POWERUP_TYPES = new string[] { "ClearColorPowerup" };
     }
 }

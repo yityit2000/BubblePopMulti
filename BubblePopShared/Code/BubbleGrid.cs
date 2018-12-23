@@ -24,10 +24,13 @@ namespace BubblePop
         readonly Texture2D bubbleSprite;
         readonly Texture2D activateBubbleOverlaySprite;
 
+        ContentManager content;
+
         public BubbleGrid(ContentManager Content)
         {
             bubbles = new List<Bubble>();
             random = new Random();
+            this.content = Content;
             bubbleSprite = Content.Load<Texture2D>("bubble");
             activateBubbleOverlaySprite = Content.Load<Texture2D>("bubble_outline");
         }
@@ -41,7 +44,16 @@ namespace BubblePop
                 for (int j = 0; j < Constants.GRID_WIDTH_IN_UNITS; j++)
                 {
                     Vector2 thisBubblesPosition = Vector2.Add(Constants.BUBBLE_GRID_ORIGIN, new Vector2(j * Constants.WORLD_UNIT, i * Constants.WORLD_UNIT));
-                    Bubble bubble = new Bubble(thisBubblesPosition, GenerateRandomColor(difficulty), bubbleSprite);
+                    // We're going to start randomly adding powerups for testing. For now, we add one at the top left.
+                    Bubble bubble;
+                    if (i == 0 && j == 0)
+                    {
+                        bubble = new ClearColorPowerup(thisBubblesPosition, GenerateRandomColor(difficulty), bubbleSprite, content);
+                    }
+                    else
+                    {
+                        bubble = new Bubble(thisBubblesPosition, GenerateRandomColor(difficulty), bubbleSprite);
+                    }
                     bubbles.Add(bubble);
 
                 }
@@ -189,6 +201,7 @@ namespace BubblePop
 
         public void RemoveActivatedBubbles()
         {
+            
             foreach (Bubble bubble in bubbles)
             {
                 if (bubble.Activated)
@@ -200,6 +213,21 @@ namespace BubblePop
                     break;
                 }
             }
+        }
+
+        public bool ThisBubbleIsAPowerup(Bubble bubble)
+        {
+            // This loops through all the powerup types in the game defined in the Constants class and compares it to the class name
+            // of the bubble. If the class name of the bubble matches the name of one of the powerups, we return true
+            for (int i = 0; i < Constants.POWERUP_TYPES.Length; i++)
+            {
+                if (bubble.GetType().Name == Constants.POWERUP_TYPES[i])
+                {
+                    return true;
+                }
+            }
+            // If this bubble didn't match with any of the names of powerups, then we return false
+            return false;
         }
 
         public void DropFloatingBubbles()
@@ -347,18 +375,6 @@ namespace BubblePop
                     break;
                 case 5:
                     randomColor = Color.White;
-                    break;
-                case 6:
-                    randomColor = Color.Pink;
-                    break;
-                case 7:
-                    randomColor = Color.Purple;
-                    break;
-                case 8:
-                    randomColor = Color.Yellow;
-                    break;
-                case 9:
-                    randomColor = Color.DarkRed;
                     break;
                 default:
                     break;

@@ -69,11 +69,17 @@
     <Compile Include="..\BubblePopShared\Code\BubbleGrid.cs">
       <Link>BubbleGrid.cs</Link>
     </Compile>
+    <Compile Include="..\BubblePopShared\Code\ClearColorPowerup.cs">
+      <Link>ClearColorPowerup.cs</Link>
+    </Compile>
     <Compile Include="..\BubblePopShared\Code\Constants.cs">
       <Link>Constants.cs</Link>
     </Compile>
     <Compile Include="..\BubblePopShared\Code\Game1.cs">
       <Link>Game1.cs</Link>
+    </Compile>
+    <Compile Include="..\BubblePopShared\Code\Powerup.cs">
+      <Link>Powerup.cs</Link>
     </Compile>
     <Compile Include="..\BubblePopShared\Code\Score.cs">
       <Link>Score.cs</Link>

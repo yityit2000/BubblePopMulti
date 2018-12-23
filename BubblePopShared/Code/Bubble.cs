@@ -11,14 +11,14 @@ namespace BubblePop
 {
     class Bubble
     {
-        private Vector2 position;
-        private Color bubbleColor;
-        private Vector2 center;
+        protected Vector2 position;
+        protected Color bubbleColor;
+        protected Vector2 center;
         
         // activated refers to when either a user clicks on a bubble or when it's next to one of the same color that's been activated
-        private bool activated;
+        protected bool activated;
 
-        private Texture2D bubbleTexture;
+        protected Texture2D bubbleTexture;
 
         public Vector2 Position
         {
@@ -46,9 +46,9 @@ namespace BubblePop
             center = new Vector2(position.X + Constants.BUBBLE_RADIUS, position.Y + Constants.BUBBLE_RADIUS);
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public virtual void Draw(SpriteBatch spriteBatch)
         {
-                spriteBatch.Draw(bubbleTexture, position, bubbleColor);     
+            spriteBatch.Draw(bubbleTexture, position, bubbleColor);     
         }
 
         // This method checks to see whether a point is within the bubble. This is easy to tell by making sure the distance

@@ -22,8 +22,10 @@ namespace BubblePop
         }
 
         readonly Texture2D bubbleSprite;
+        readonly Texture2D clearColorPowerupSprite;
         readonly Texture2D activateBubbleOverlaySprite;
-
+        readonly Texture2D activatePowerupOverlaySprite;
+        
         ContentManager content;
 
         public BubbleGrid(ContentManager Content)
@@ -32,13 +34,24 @@ namespace BubblePop
             random = new Random();
             this.content = Content;
             bubbleSprite = Content.Load<Texture2D>("bubble");
+            clearColorPowerupSprite = Content.Load<Texture2D>("powerup_clear_color");
             activateBubbleOverlaySprite = Content.Load<Texture2D>("bubble_outline");
+            activatePowerupOverlaySprite = Content.Load<Texture2D>("powerup_outline");
         }
 
         public void Initialize(int difficulty)
         {
             bubbles.Clear();
-            // Set up initial grid of bubbles.
+            /* Set up initial grid of bubbles. Poweups will be places in random spots within the grid, though not
+             * in place of any of the outermost bubbles */
+            int randomCoordinateX1 = random.Next(Constants.GRID_WIDTH_IN_UNITS - 1);
+            if (randomCoordinateX1 == 0) { randomCoordinateX1++; }
+            int randomCoordinateY1 = random.Next(Constants.GRID_HEIGHT_IN_UNITS - 1);
+            if (randomCoordinateY1 == 0) { randomCoordinateY1++; }
+            int randomCoordinateX2 = random.Next(Constants.GRID_WIDTH_IN_UNITS - 1);
+            if (randomCoordinateX2 == 0) { randomCoordinateX2++; }
+            int randomCoordinateY2 = random.Next(Constants.GRID_HEIGHT_IN_UNITS - 1);
+            if (randomCoordinateY1 == 0) { randomCoordinateY1++; }
             for (int i = 0; i < Constants.GRID_HEIGHT_IN_UNITS; i++)
             {
                 for (int j = 0; j < Constants.GRID_WIDTH_IN_UNITS; j++)
@@ -46,9 +59,31 @@ namespace BubblePop
                     Vector2 thisBubblesPosition = Vector2.Add(Constants.BUBBLE_GRID_ORIGIN, new Vector2(j * Constants.WORLD_UNIT, i * Constants.WORLD_UNIT));
                     // We're going to start randomly adding powerups for testing. For now, we add one at the top left.
                     Bubble bubble;
-                    if (i == 0 && j == 0)
+                    if (difficulty > 3 && difficulty < 5)
                     {
-                        bubble = new ClearColorPowerup(thisBubblesPosition, GenerateRandomColor(difficulty), bubbleSprite, content);
+                        if (i == randomCoordinateX1 && j == randomCoordinateY1)
+                        {
+                            bubble = new ClearColorPowerup(thisBubblesPosition, GenerateRandomColor(difficulty), clearColorPowerupSprite, content);
+                        }
+                        else
+                        {
+                            bubble = new Bubble(thisBubblesPosition, GenerateRandomColor(difficulty), bubbleSprite);
+                        }
+                    }
+                    else if (difficulty > 4)
+                    {
+                        if (i == randomCoordinateX1 && j == randomCoordinateY1)
+                        {
+                            bubble = new ClearColorPowerup(thisBubblesPosition, GenerateRandomColor(difficulty), clearColorPowerupSprite, content);
+                        }
+                        else if (i == randomCoordinateX2 && j == randomCoordinateY2)
+                        {
+                            bubble = new ClearColorPowerup(thisBubblesPosition, GenerateRandomColor(difficulty), clearColorPowerupSprite, content);
+                        }
+                        else
+                        {
+                            bubble = new Bubble(thisBubblesPosition, GenerateRandomColor(difficulty), bubbleSprite);
+                        }
                     }
                     else
                     {
@@ -72,7 +107,14 @@ namespace BubblePop
                 bubble.Draw(spriteBatch);
                 if (bubble.Activated)
                 {
-                    spriteBatch.Draw(activateBubbleOverlaySprite, bubble.Position, bubble.BubbleColor);
+                    if (ThisBubbleIsAPowerup(bubble))
+                    {
+                        spriteBatch.Draw(activatePowerupOverlaySprite, bubble.Position, bubble.BubbleColor);
+                    }
+                    else
+                    {
+                        spriteBatch.Draw(activateBubbleOverlaySprite, bubble.Position, bubble.BubbleColor);
+                    }
                 }
             }
         }

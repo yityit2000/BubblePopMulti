@@ -16,7 +16,7 @@ namespace BubblePop
 
         public Powerup(Vector2 position, Color bubbleColor, Texture2D bubbleTexture, ContentManager Content) : base(position, bubbleColor, bubbleTexture)
         {
-            font = Content.Load<SpriteFont>("Score");
+            font = Content.Load<SpriteFont>("PowerupUi");
         }
 
         public abstract void DoEffect(BubbleGrid bubbleGrid);
@@ -24,10 +24,13 @@ namespace BubblePop
         public override void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(bubbleTexture, position, bubbleColor);
-            // Right now, we are just identifying powerups based on them having a number inside them that displays the bubbles needed to activate them.
-            // Eventually, we'll probably have a different texture associated with different powerups
+            /* There is a smaller bubble in the lower righthand corner of the powerup texture. "powerupUiPosition" is doing some math to place the
+             * string representing the bubbles required to activate the powerup in the center of that smaller bubble. I don't have a constant for
+             * exactly that value because the value is dependant on the width and height of the string itself, which I calculate here. */
             Vector2 sizeOfString = font.MeasureString(bubblesRequiredToActivate.ToString());
-            spriteBatch.DrawString(font, bubblesRequiredToActivate.ToString(), new Vector2(center.X - sizeOfString.X / 2, center.Y - sizeOfString.Y / 2), Color.White);
+            Vector2 powerupUiPosition = new Vector2(position.X + Constants.POWERUP_UI_POSITION_OFFSET.X - sizeOfString.X / 2, 
+                                                    position.Y + Constants.POWERUP_UI_POSITION_OFFSET.Y - sizeOfString.Y / 2);
+            spriteBatch.DrawString(font, bubblesRequiredToActivate.ToString(), powerupUiPosition, Color.White);
         }
     }
 }

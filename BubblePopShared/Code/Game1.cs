@@ -10,6 +10,7 @@ namespace BubblePop
 {
     public class Game1 : Game
     {
+        // Monogame related variables for running any game
         GraphicsDeviceManager graphics;
         Camera2D camera;
         ViewportAdapter viewportAdapter;
@@ -230,9 +231,15 @@ namespace BubblePop
 
         public void StartNextLevel()
         {
-            if (difficulty < 7)
+            if (difficulty < 6)
             {
                 difficulty++;
+            }
+            else
+            {
+                difficulty = 3;
+                level = 1;
+                score = new Score();
             }
             bubbleGrid.Initialize(difficulty);
         }

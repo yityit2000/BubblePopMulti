@@ -58,6 +58,24 @@ namespace BubblePop
 
         public override void Update(GameTime gameTime, Camera2D camera)
         {
+            // Update bubble positions
+            foreach (Bubble bubble in bubbleGrid.Bubbles)
+            {
+                Vector2 oldPosition = bubble.Position;
+                bubble.Update(gameTime);
+                HandleCollision(bubble);
+                if (Equals(oldPosition, bubble.Position))
+                {
+                    bubble.IsFalling = false;
+                }
+                else
+                {
+                    bubble.IsFalling = true;
+                }
+            }
+
+            bubbleGrid.CollapseBubbleColumns();
+
             //Get current state of inputs so that we can check whether the player has clicked/tapped the screen
             MouseState newState = Mouse.GetState();
             TouchCollection touchCollection = TouchPanel.GetState();
@@ -101,24 +119,8 @@ namespace BubblePop
 
                 if (readyToRemoveActivatedBubbles)
                 {
-                    // Before removing the activated bubbles, we check to see if any of them are powerups. If they are, we have the powerup do its effect.
-                    foreach (Bubble bubble in bubbleGrid.Bubbles)
-                    {
-                        if (bubbleGrid.ThisBubbleIsAPowerup(bubble) && bubble.Activated)
-                        {
-                            /* All powerups are bubbles, but not all bubbles are powerups. Therefore, we can't go calling bubble.DoEffect(...) on any old
-                             bubble willy-nilly. We have to use a tool called "Reflection" to be able to use the DoEffect method in the Powerup class. 
-                             When we DO find a powerup to use it on, it will have different syntax, corresponding to the two lines of code below.*/
-                            Object[] variablesToPassIntoDoEffect = new Object[] { bubbleGrid };
-                            //For all intents and purposes, you can read the line of code below as:
-                            //bubble.DoEffect(bubbleGrid)
-                            bubble.GetType().InvokeMember("DoEffect", System.Reflection.BindingFlags.InvokeMethod, null, bubble, variablesToPassIntoDoEffect);
-                        }
-                    }
                     score.Add(bubbleGrid.NumberOfActivatedBubbles(), level);
                     bubbleGrid.RemoveActivatedBubbles();
-                    bubbleGrid.DropFloatingBubbles();
-                    bubbleGrid.CollapseBubbleColumns();
                     readyToRemoveActivatedBubbles = false;
                     oldState = newState;
                     if (LevelIsCleared()) //May eventually pass in score.Value
@@ -148,11 +150,31 @@ namespace BubblePop
                 }
                 bubbleGrid.ActivateAllConnectedBubbles();
             }
-
             /* We update the old mouse state so that we can keep accurately acting through single mouse clicks rather than
              * if the mouse is held for a few frames (when the user THINKS they only clicked once) */
             oldState = newState;
 
+        }
+
+        // This method compares the position of one bubble to that of all the other bubbles in the grid. If this bubble tries falling through any
+        // other bubbles or through the bottom of the grid, we stop it from doing so.
+        private void HandleCollision(Bubble bubbleToHandle)
+        {
+            foreach(Bubble bubble in bubbleGrid.Bubbles)
+            {
+                if (bubbleToHandle.Position.Y >= Constants.BOTTOM_OF_GRID)
+                {
+                    bubbleToHandle.MoveTo(bubbleToHandle.Position.X, Constants.BOTTOM_OF_GRID);
+                    return;
+                }
+
+                Vector2 topOfBubble = new Vector2(bubble.Position.X + Constants.BUBBLE_RADIUS, bubble.Position.Y);
+                if (bubbleToHandle.Intersects(topOfBubble))
+                {
+                    bubbleToHandle.MoveTo(bubbleToHandle.Position.X, bubble.Position.Y - Constants.WORLD_UNIT);
+                    return;
+                }
+            }
         }
 
         public override void Draw(SpriteBatch spriteBatch, ViewportAdapter viewportAdapter, Camera2D camera2D)

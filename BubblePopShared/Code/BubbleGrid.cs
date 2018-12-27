@@ -23,6 +23,7 @@ namespace BubblePop
 
         readonly Texture2D bubbleSprite;
         readonly Texture2D clearColorPowerupSprite;
+        readonly Texture2D clearRowAndColumnPowerupSprite;
         readonly Texture2D activateBubbleOverlaySprite;
         readonly Texture2D activatePowerupOverlaySprite;
         
@@ -35,6 +36,7 @@ namespace BubblePop
             this.content = Content;
             bubbleSprite = Content.Load<Texture2D>("bubble");
             clearColorPowerupSprite = Content.Load<Texture2D>("powerup_clear_color");
+            clearRowAndColumnPowerupSprite = Content.Load<Texture2D>("powerup_clear_row_and_column");
             activateBubbleOverlaySprite = Content.Load<Texture2D>("bubble_outline");
             activatePowerupOverlaySprite = Content.Load<Texture2D>("powerup_outline");
         }
@@ -64,7 +66,7 @@ namespace BubblePop
                     {
                         if (i == randomCoordinateX1 && j == randomCoordinateY1)
                         {
-                            bubble = new ClearColorPowerup(thisBubblesPosition, GenerateRandomColor(difficulty), clearColorPowerupSprite, content);
+                            bubble = new ClearRowAndColumnPowerup(thisBubblesPosition, GenerateRandomColor(difficulty), clearRowAndColumnPowerupSprite, content);
                         }
                         else
                         {
@@ -75,7 +77,7 @@ namespace BubblePop
                     {
                         if (i == randomCoordinateX1 && j == randomCoordinateY1)
                         {
-                            bubble = new ClearColorPowerup(thisBubblesPosition, GenerateRandomColor(difficulty), clearColorPowerupSprite, content);
+                            bubble = new ClearRowAndColumnPowerup(thisBubblesPosition, GenerateRandomColor(difficulty), clearRowAndColumnPowerupSprite, content);
                         }
                         else if (i == randomCoordinateX2 && j == randomCoordinateY2)
                         {
@@ -91,7 +93,6 @@ namespace BubblePop
                         bubble = new Bubble(thisBubblesPosition, GenerateRandomColor(difficulty), bubbleSprite);
                     }
                     bubbles.Add(bubble);
-
                 }
             }
         }
@@ -133,6 +134,22 @@ namespace BubblePop
                     {
                         ActivateConnectedBubbles(bubbles.IndexOf(bubble));
                     }
+                }
+            }
+            
+            /* After we've activated all the normal connected bubbles, we check to see if we've activated any powerups. If we have, we do the
+             * effect of that powerup, which is to activate a set of bubbles outside of a normal gameplay situation. */
+            foreach (Bubble bubble in bubbles)
+            {
+                if (ThisBubbleIsAPowerup(bubble) && bubble.Activated)
+                {
+                    /* All powerups are bubbles, but not all bubbles are powerups. Therefore, we can't go calling bubble.DoEffect(...) on any old
+                     * bubble willy-nilly. We have to use a tool called "Reflection" to be able to use the DoEffect method in the Powerup class. 
+                     * When we DO find a powerup to use it on, it will have different syntax, corresponding to the two lines of code below.*/
+                    Object[] variablesToPassIntoDoEffect = new Object[] { this };
+                    // For all intents and purposes, you can read the line of code below as:
+                    // bubble.DoEffect(bubbleGrid)
+                    bubble.GetType().InvokeMember("DoEffect", System.Reflection.BindingFlags.InvokeMethod, null, bubble, variablesToPassIntoDoEffect);
                 }
             }
         }
@@ -272,41 +289,19 @@ namespace BubblePop
             // If this bubble didn't match with any of the names of powerups, then we return false
             return false;
         }
-
-        public void DropFloatingBubbles()
-        {
-            for (int i = bubbles.Count-1; i >= 0; i--)
-            {
-                if (bubbles[i].Position.Y >= Constants.BOTTOM_OF_GRID)
-                {
-                    continue;
-                }
-
-                // While there is no bubble under the current bubble we're checking...
-                int counter = 0;
-                while(GetBubbleIndexFromPosition(bubbles[i].Position.X, bubbles[i].Position.Y + Constants.WORLD_UNIT) < 0)
-                {
-                    counter++;
-                    if (counter > Constants.GRID_HEIGHT_IN_UNITS)
-                    {
-                        Console.WriteLine("Something went wrong, we're continuously dropping...");
-                        return;
-                    }
-                    
-                    //Drop the current bubble down a WORLD_UNIT.
-                    bubbles[i].Drop();
-
-                    // If we found the bottom, then we're done with this bubble and can move to the next one
-                    if (bubbles[i].Position.Y >= Constants.BOTTOM_OF_GRID)
-                    {
-                        break;
-                    }                                     
-                }
-            }
-        }
         
         public void CollapseBubbleColumns()
         {
+            //Make sure all the bubbles have stopped falling
+            foreach (Bubble bubble in bubbles)
+            {
+                if (bubble.IsFalling)
+                {
+                    Console.WriteLine(bubbles.IndexOf(bubble));
+                    return;
+                }
+            }
+
             //Check each element in the last row (in reverse) to see if there's an element to its left, based on position. We end at 1 because we will never need
             //to collapse the leftmost row.
             for (int i = Constants.GRID_WIDTH_IN_UNITS - 1; i > -1; i--)
@@ -323,6 +318,7 @@ namespace BubblePop
                     {
                         if (GetBubbleIndexFromPosition(Constants.BUBBLE_GRID_ORIGIN.X + (j * Constants.WORLD_UNIT), Constants.BOTTOM_OF_GRID) != Constants.NO_BUBBLE)
                         {
+                            // Then, we move the next column of bubbles we find, to be right next to the column we are checking.
                             MoveColumnOfBubbles(Constants.BUBBLE_GRID_ORIGIN.X + j * Constants.WORLD_UNIT, bubbles[currentIndex].Position.X - Constants.WORLD_UNIT);
                             break;
                         }

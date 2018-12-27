@@ -10,6 +10,9 @@ namespace BubblePop
         public static float WORLD_UNIT = 64f;
         public static float BUBBLE_RADIUS = WORLD_UNIT / 2f;
 
+        // Fall speed of bubbles
+        public static float FALL_SPEED = 1f;
+
         /* This screen width and height is used when testing what the game will look like
          * on a phone and will be used for the final design of the game. */
         public static float WORLD_WIDTH = 576f;
@@ -38,7 +41,7 @@ namespace BubblePop
         public static int SCORING_UNIT = 1;
 
         // This defines all the types of powerups in this game. Might make this an enum later, we'll see.
-        public static string[] POWERUP_TYPES = new string[] { "ClearColorPowerup" };
+        public static string[] POWERUP_TYPES = new string[] { "ClearColorPowerup", "ClearRowAndColumnPowerup" };
 
         // This represents the position to place the Powerup UI in relation to a bubble's position. Found through trial and error.
         internal static Vector2 POWERUP_UI_POSITION_OFFSET = new Vector2((int)(BUBBLE_RADIUS * 1.5), (int)(BUBBLE_RADIUS * 1.6));

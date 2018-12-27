@@ -15,6 +15,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Code\Bubble.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Code\BubbleGrid.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Code\ClearColorPowerup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Code\ClearRowAndColumnPowerup.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Code\Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Code\Game1.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Code\GameScreen.cs" />

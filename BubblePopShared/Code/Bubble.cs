@@ -14,9 +14,14 @@ namespace BubblePop
         protected Vector2 position;
         protected Color bubbleColor;
         protected Vector2 center;
+
+        // speed at which the bubble will fall
+        protected float speed = Constants.FALL_SPEED;
         
         // activated refers to when either a user clicks on a bubble or when it's next to one of the same color that's been activated
         protected bool activated;
+
+        protected bool isFalling; //Consider making into simple state machine with "FALLING" AND "RESTING"
 
         protected Texture2D bubbleTexture;
 
@@ -37,13 +42,26 @@ namespace BubblePop
             set { activated = value;  }
         }
 
+        public bool IsFalling
+        {
+            get { return isFalling; }
+            set { isFalling = value; }
+        }
+
         public Bubble(Vector2 position, Color bubbleColor, Texture2D bubbleTexture)
         {
             this.position = position;
             this.bubbleColor = bubbleColor;
             this.bubbleTexture = bubbleTexture;
             activated = false;
+            isFalling = false;
             center = new Vector2(position.X + Constants.BUBBLE_RADIUS, position.Y + Constants.BUBBLE_RADIUS);
+        }
+
+        public void Update(GameTime gameTime)
+        {
+            position.Y += speed * gameTime.ElapsedGameTime.Milliseconds;
+            center = Vector2.Add(position, Constants.RADIUS_VECTOR);
         }
 
         public virtual void Draw(SpriteBatch spriteBatch)
@@ -57,10 +75,10 @@ namespace BubblePop
         // where "D" is the distance, we can see whether D is less than the radius. That being said, it's programatically cheaper
         // to see if the square distance is less than the radius (D^2 < radius^2). If it is, then the click is within the circle,
         // and we have collision!
-        public bool Intersects(Vector2 click)
+        public bool Intersects(Vector2 point)
         {
             // Pythagorus strikes again
-            float squareDistance = (click.X - center.X) * (click.X - center.X) + (click.Y - center.Y) * (click.Y - center.Y);
+            float squareDistance = (point.X - center.X) * (point.X - center.X) + (point.Y - center.Y) * (point.Y - center.Y);
             if (squareDistance < (Constants.BUBBLE_RADIUS * Constants.BUBBLE_RADIUS))
             {
                 return true;

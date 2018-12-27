@@ -78,6 +78,9 @@
     <Compile Include="..\BubblePopShared\Code\ClearColorPowerup.cs">
       <Link>ClearColorPowerup.cs</Link>
     </Compile>
+    <Compile Include="..\BubblePopShared\Code\ClearRowAndColumnPowerup.cs">
+      <Link>ClearRowAndColumnPowerup.cs</Link>
+    </Compile>
     <Compile Include="..\BubblePopShared\Code\Constants.cs">
       <Link>Constants.cs</Link>
     </Compile>

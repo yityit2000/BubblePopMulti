@@ -39,6 +39,7 @@ namespace BubblePop
             activatePowerupOverlaySprite = Content.Load<Texture2D>("powerup_outline");
         }
 
+        // Long and clunky, consider rewriting
         public void Initialize(int difficulty)
         {
             bubbles.Clear();

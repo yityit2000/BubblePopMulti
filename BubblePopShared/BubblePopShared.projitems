@@ -17,7 +17,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)Code\ClearColorPowerup.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Code\Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Code\Game1.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Code\GameScreen.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Code\MainMenuScreen.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Code\Powerup.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Code\Score.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Code\Screen.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Code\ScreenManager.cs" />
   </ItemGroup>
 </Project>

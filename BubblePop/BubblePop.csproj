@@ -84,11 +84,23 @@
     <Compile Include="..\BubblePopShared\Code\Game1.cs">
       <Link>Game1.cs</Link>
     </Compile>
+    <Compile Include="..\BubblePopShared\Code\GameScreen.cs">
+      <Link>Screens\GameScreen.cs</Link>
+    </Compile>
+    <Compile Include="..\BubblePopShared\Code\MainMenuScreen.cs">
+      <Link>Screens\MainMenuScreen.cs</Link>
+    </Compile>
     <Compile Include="..\BubblePopShared\Code\Powerup.cs">
       <Link>Powerup.cs</Link>
     </Compile>
     <Compile Include="..\BubblePopShared\Code\Score.cs">
       <Link>Score.cs</Link>
+    </Compile>
+    <Compile Include="..\BubblePopShared\Code\Screen.cs">
+      <Link>Screens\Screen.cs</Link>
+    </Compile>
+    <Compile Include="..\BubblePopShared\Code\ScreenManager.cs">
+      <Link>Screens\ScreenManager.cs</Link>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
